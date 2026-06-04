@@ -6,7 +6,7 @@ export const BookingSchema = z.object({
   appointment_date: z.string().refine((date) => {
     return new Date(date) >= new Date(new Date().setHours(0,0,0,0));
   }, { message: "Appointment date cannot be in the past." }),
-  appointment_time: z.enum(["Morning", "Evening"], { errorMap: () => ({ message: "Please select Morning or Evening." }) }),
+  appointment_time: z.enum(["Morning", "Evening"], { message: "Please select Morning or Evening." }),
   reason: z.string().min(5, "Please provide a brief reason for your visit (min 5 characters).").max(1000),
 });
 
