@@ -1,0 +1,138 @@
+'use server'
+
+import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
+import { DoctorSchema } from '@/lib/schema'
+import { handleZodError, handleSupabaseError, DbResult } from '@/utils/db'
+import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
+
+export async function addDoctor(
+  formData: FormData,
+  photoFile?: File
+): Promise<DbResult<null>> {
+  try {
+    const supabase = await createClient();
+    
+    // 1. Check if caller is Admin
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: "Unauthorized." }
+    
+    const { data: adminCheck } = await supabase.from('admins').select('id').eq('id', user.id).single();
+    if (!adminCheck) return { success: false, error: "Admin access required." }
+
+    // 2. Parse and Validate Form Data
+    const rawData = {
+      department_id: formData.get('department_id'),
+      first_name: formData.get('first_name'),
+      last_name: formData.get('last_name'),
+      phone: formData.get('phone') || undefined,
+      designation: formData.get('designation'),
+      qualifications: formData.get('qualifications'),
+      experience: formData.get('experience'),
+      consultation_fee: formData.get('consultation_fee'),
+      languages: formData.get('languages'),
+      bio: formData.get('bio') || undefined,
+      email: formData.get('email'),
+      password: formData.get('password'),
+      available_days: formData.getAll('available_days'),
+    }
+
+    const validatedData = DoctorSchema.parse(rawData);
+
+    // 3. Create Auth User using Admin Client
+    const adminAuth = createAdminClient();
+    const { data: authData, error: authError } = await adminAuth.auth.admin.createUser({
+      email: validatedData.email,
+      password: validatedData.password,
+      email_confirm: true, // Auto-confirm email
+    });
+
+    if (authError || !authData.user) {
+      return { success: false, error: authError?.message || "Failed to create authentication credentials." };
+    }
+
+    const newDoctorId = authData.user.id;
+    let photoUrl = null;
+
+    // 4. Upload Photo (if provided)
+    if (photoFile && photoFile.size > 0) {
+      const fileExt = photoFile.name.split('.').pop();
+      const fileName = `${newDoctorId}.${fileExt}`;
+      const { data: uploadData, error: uploadError } = await adminAuth.storage
+        .from('avatars')
+        .upload(fileName, photoFile, { upsert: true });
+
+      if (uploadError) {
+        console.error("Photo upload failed:", uploadError);
+        // We continue anyway, but ideally handle this.
+      } else if (uploadData) {
+        const { data: publicUrlData } = adminAuth.storage.from('avatars').getPublicUrl(fileName);
+        photoUrl = publicUrlData.publicUrl;
+      }
+    }
+
+    // 5. Insert into public.doctors
+    const languagesArray = validatedData.languages.split(',').map(s => s.trim());
+
+    const { error: insertError } = await adminAuth.from('doctors').insert({
+      id: newDoctorId,
+      department_id: validatedData.department_id,
+      first_name: validatedData.first_name,
+      last_name: validatedData.last_name,
+      phone: validatedData.phone,
+      designation: validatedData.designation,
+      qualifications: validatedData.qualifications,
+      experience: validatedData.experience,
+      consultation_fee: validatedData.consultation_fee,
+      languages: languagesArray,
+      bio: validatedData.bio,
+      available_days: validatedData.available_days,
+      // If schema had an avatar_url field, we'd add it here.
+    });
+
+    if (insertError) {
+      // Rollback Auth user creation if DB insert fails
+      await adminAuth.auth.admin.deleteUser(newDoctorId);
+      return handleSupabaseError(insertError);
+    }
+
+    revalidatePath('/dashboard/admin/doctors');
+    revalidatePath('/doctors');
+    return { success: true };
+    
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return handleZodError(error)
+    }
+    return { success: false, error: "An unexpected server error occurred." }
+  }
+}
+
+export async function deleteDoctor(id: string): Promise<DbResult<null>> {
+  try {
+    const supabase = await createClient();
+    
+    // Check Admin
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: "Unauthorized." }
+    const { data: adminCheck } = await supabase.from('admins').select('id').eq('id', user.id).single();
+    if (!adminCheck) return { success: false, error: "Admin access required." }
+
+    const adminAuth = createAdminClient();
+    
+    // Delete from auth.users (this cascades to public.doctors)
+    const { error } = await adminAuth.auth.admin.deleteUser(id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath('/dashboard/admin/doctors');
+    revalidatePath('/doctors');
+    return { success: true };
+    
+  } catch (error) {
+    return { success: false, error: "An unexpected server error occurred." }
+  }
+}
