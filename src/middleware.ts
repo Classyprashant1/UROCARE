@@ -32,16 +32,18 @@ export async function middleware(request: NextRequest) {
   // Strict route protection
   const path = request.nextUrl.pathname;
   
-  if (path.startsWith('/dashboard')) {
+  if (path.startsWith('/dashboard') || path.startsWith('/booking')) {
     if (!user) {
       // Unauthenticated, kick to login
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)
     }
+  }
 
-    // Role-based protection
-    const role = user.user_metadata?.role || 'patient'
+  // Role-based protection
+  if (path.startsWith('/dashboard')) {
+    const role = user?.user_metadata?.role || 'patient'
     
     if (path.startsWith('/dashboard/admin') && role !== 'admin') {
       const url = request.nextUrl.clone()
