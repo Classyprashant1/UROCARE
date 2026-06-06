@@ -39,16 +39,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Scripts with secrets
-scratch.js
-createDoctor.js
-seed_depts.js
-updateDoctorRole.js
-
-# Env files
-.env
-.env.local
-.env.development
-.env.test
-.env.production
