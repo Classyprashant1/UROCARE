@@ -89,7 +89,6 @@ export default function ContactPage() {
 
       {/* Map Section */}
       <div className="w-full h-96 bg-slate-200 mt-8 relative">
-        {/* We use an iframe pointing to Google Maps based on coordinates in HOSPITAL config */}
         <iframe 
           title="Hospital Location"
           width="100%" 
@@ -98,7 +97,7 @@ export default function ContactPage() {
           loading="lazy" 
           allowFullScreen 
           referrerPolicy="no-referrer-when-downgrade"
-          src={`https://www.google.com/maps?q=${HOSPITAL.coordinates.lat},${HOSPITAL.coordinates.lng}&hl=es;z=15&output=embed`}
+          src={`https://www.google.com/maps?q=${encodeURIComponent(HOSPITAL.name + ', ' + HOSPITAL.address.full)}&output=embed`}
         ></iframe>
       </div>
 

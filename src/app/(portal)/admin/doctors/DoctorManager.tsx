@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import { addDoctor, deleteDoctor } from '@/app/actions/admin/doctors'
+import { Avatar } from '@/components/ui/Avatar'
 
 export default function DoctorManager({ initialDoctors, departments }: { initialDoctors: any[], departments: any[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
   
   // Basic list view
   return (
@@ -34,7 +36,15 @@ export default function DoctorManager({ initialDoctors, departments }: { initial
           <tbody className="divide-y divide-slate-100">
             {initialDoctors.map(doctor => (
               <tr key={doctor.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 font-medium text-slate-900">{doctor.name}</td>
+                <td className="px-6 py-4 font-medium text-slate-900 flex items-center gap-3">
+                  <Avatar 
+                    src={doctor.avatar_url} 
+                    alt={doctor.name} 
+                    initials={doctor.name.split(' ').slice(-1)[0][0]} 
+                    className="w-10 h-10 text-sm" 
+                  />
+                  {doctor.name}
+                </td>
                 <td className="px-6 py-4">{doctor.department}</td>
                 <td className="px-6 py-4">{doctor.designation}</td>
                 <td className="px-6 py-4 text-right flex justify-end gap-3">
@@ -74,18 +84,27 @@ export default function DoctorManager({ initialDoctors, departments }: { initial
             <form action={async (formData) => {
               setIsSubmitting(true);
               setErrorMsg('');
+              setFieldErrors({});
               const res = await addDoctor(formData, formData.get('photo') as File);
               setIsSubmitting(false);
               if (res.success) {
                 setIsModalOpen(false);
               } else {
                 setErrorMsg(res.error || 'Failed to add doctor.');
+                if (res.fieldErrors) setFieldErrors(res.fieldErrors);
               }
             }} className="p-6 flex flex-col gap-5">
               
               {errorMsg && (
                 <div className="p-3 bg-red-50 text-red-700 rounded border border-red-200 text-sm">
                   {errorMsg}
+                  {Object.keys(fieldErrors).length > 0 && (
+                    <ul className="list-disc pl-5 mt-2">
+                      {Object.entries(fieldErrors).map(([field, errors]) => (
+                        <li key={field}><strong>{field}:</strong> {errors.join(', ')}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
 
@@ -111,18 +130,21 @@ export default function DoctorManager({ initialDoctors, departments }: { initial
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-5">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Department</label>
-                  <select name="department_id" required className="h-10 px-3 border rounded-lg bg-white">
-                    <option value="">Select...</option>
-                    {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                  </select>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-slate-700">Departments</label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                  {departments.map(d => (
+                    <label key={d.id} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer hover:text-blue-700 transition-colors">
+                      <input type="checkbox" name="department_ids" value={d.id} className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600" />
+                      {d.name}
+                    </label>
+                  ))}
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Designation</label>
-                  <input name="designation" required placeholder="e.g. Senior Consultant" className="h-10 px-3 border rounded-lg" />
-                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-slate-700">Designation</label>
+                <input name="designation" required placeholder="e.g. Senior Consultant" className="h-10 px-3 border rounded-lg" />
               </div>
 
               <div className="grid grid-cols-2 gap-5">

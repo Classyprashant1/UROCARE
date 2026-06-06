@@ -19,8 +19,8 @@ export async function updateMessageStatus(id: string, status: 'unread' | 'read' 
 
     if (error) return handleSupabaseError(error);
 
-    revalidatePath('/dashboard/admin/messages');
-    revalidatePath('/dashboard/admin'); // Overview uses it too
+    revalidatePath('/admin/messages');
+    revalidatePath('/admin'); // Overview uses it too
     return { success: true };
     
   } catch (error) {

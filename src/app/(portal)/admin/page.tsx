@@ -121,7 +121,7 @@ export default async function AdminDashboard() {
               <span className="material-symbols-outlined text-rose-500">mark_email_unread</span>
               Action Required ({analytics.unreadMessages})
             </h2>
-            <Link href="/dashboard/admin/messages" className="text-sm text-blue-600 font-semibold hover:underline">View All</Link>
+            <Link href="/admin/messages" className="text-sm text-blue-600 font-semibold hover:underline">View All</Link>
           </div>
           <div className="p-0 flex-1">
             {recentMessages && recentMessages.length > 0 ? (
@@ -132,7 +132,7 @@ export default async function AdminDashboard() {
                       <p className="font-bold text-sm text-slate-900 line-clamp-1">{msg.subject}</p>
                       <p className="text-xs text-slate-500 mt-0.5">From: {msg.name} ({msg.email})</p>
                     </div>
-                    <Link href={`/dashboard/admin/messages`} className="text-xs font-semibold text-blue-600 border border-blue-200 bg-blue-50 px-3 py-1.5 rounded-lg shrink-0">
+                    <Link href={`/admin/messages`} className="text-xs font-semibold text-blue-600 border border-blue-200 bg-blue-50 px-3 py-1.5 rounded-lg shrink-0">
                       Respond
                     </Link>
                   </li>

@@ -20,6 +20,8 @@ export async function createAppointment(
 
     // Prepare payload
     const rawData = {
+      patient_name: formData.get('patient_name'),
+      patient_phone: formData.get('patient_phone'),
       department_id: formData.get('department_id'),
       doctor_id: formData.get('doctor_id'),
       appointment_date: formData.get('appointment_date'),
@@ -33,6 +35,8 @@ export async function createAppointment(
     // Insert into Supabase
     const { error } = await supabase.from('appointments').insert({
       patient_id: user.id,
+      patient_name: validatedData.patient_name,
+      patient_phone: validatedData.patient_phone,
       department_id: validatedData.department_id,
       doctor_id: validatedData.doctor_id,
       appointment_date: validatedData.appointment_date,
@@ -46,7 +50,7 @@ export async function createAppointment(
     }
 
     // Revalidate patient dashboard so new appointment shows up immediately
-    revalidatePath('/dashboard/patient')
+    revalidatePath('/dashboard')
 
     return { success: true }
     

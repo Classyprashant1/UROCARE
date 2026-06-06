@@ -38,7 +38,7 @@ export async function addDepartment(formData: FormData): Promise<DbResult<null>>
 
     if (error) return handleSupabaseError(error);
 
-    revalidatePath('/dashboard/admin/departments');
+    revalidatePath('/admin/departments');
     revalidatePath('/departments');
     return { success: true };
     
@@ -60,7 +60,7 @@ export async function deleteDepartment(id: string): Promise<DbResult<null>> {
 
     if (error) return handleSupabaseError(error);
 
-    revalidatePath('/dashboard/admin/departments');
+    revalidatePath('/admin/departments');
     revalidatePath('/departments');
     return { success: true };
     

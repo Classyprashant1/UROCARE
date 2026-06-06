@@ -1,5 +1,6 @@
 import BookingForm from './BookingForm'
 import { getDepartments, getDoctors } from '@/app/actions/data'
+import { Suspense } from 'react'
 
 export default async function BookingPage() {
   const departments = await getDepartments()
@@ -13,7 +14,9 @@ export default async function BookingPage() {
       </div>
 
       {/* Renders the interactive client form, passing down the Supabase data */}
-      <BookingForm departments={departments} doctors={doctors} />
+      <Suspense fallback={<div className="p-8 text-center text-slate-500">Loading booking form...</div>}>
+        <BookingForm departments={departments} doctors={doctors} />
+      </Suspense>
     </div>
   )
 }

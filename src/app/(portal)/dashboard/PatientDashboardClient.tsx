@@ -85,7 +85,7 @@ export default function PatientDashboardClient({
                     <div>
                       <div className="flex items-center gap-3 mb-1">
                         <h3 className="font-bold text-slate-900 text-lg">Dr. {appt.doctors?.first_name} {appt.doctors?.last_name}</h3>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">{appt.departments?.name}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">{appt.doctors?.departments?.name || appt.departments?.name}</span>
                       </div>
                       <p className="text-sm text-slate-500 font-medium">
                         {new Date(appt.appointment_date).toLocaleDateString()} at {appt.appointment_time.substring(0, 5)}
@@ -246,6 +246,8 @@ export default function PatientDashboardClient({
                   </select>
                 </div>
               </div>
+
+
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-semibold text-slate-700">Residential Address</label>

@@ -25,9 +25,10 @@ export async function login(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
     const role = user.user_metadata?.role || 'patient'
-    redirect(`/dashboard/${role}`)
+    const route = role === 'admin' ? '/admin' : role === 'doctor' ? '/doctor' : '/dashboard'
+    redirect(route)
   } else {
-    redirect('/dashboard/patient')
+    redirect('/dashboard')
   }
 }
 
@@ -52,8 +53,41 @@ export async function signup(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
     const role = user.user_metadata?.role || 'patient'
-    redirect(`/dashboard/${role}`)
+    const route = role === 'admin' ? '/admin' : role === 'doctor' ? '/doctor' : '/dashboard'
+    redirect(route)
   } else {
     redirect('/login?message=Account created successfully! You can now log in.')
   }
+}
+
+export async function resetPassword(formData: FormData) {
+  const supabase = await createClient()
+  const email = formData.get('email') as string
+
+  // The redirectTo URL where the user will be sent after clicking the email link
+  // Usually the callback route or the update-password page directly.
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/update-password`,
+  })
+
+  if (error) {
+    console.error('Reset Password Error:', error.message)
+    redirect(`/login?message=${encodeURIComponent(error.message)}`)
+  }
+
+  redirect('/login?message=Check your email for the password reset link.')
+}
+
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient()
+  const password = formData.get('password') as string
+
+  const { error } = await supabase.auth.updateUser({ password })
+
+  if (error) {
+    console.error('Update Password Error:', error.message)
+    redirect(`/update-password?message=${encodeURIComponent(error.message)}`)
+  }
+
+  redirect('/login?message=Password updated successfully. Please log in.')
 }

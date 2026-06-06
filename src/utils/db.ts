@@ -29,7 +29,9 @@ export function handleSupabaseError(error: any): DbResult<any> {
   // e.g. '23505' -> 'This record already exists'
   let message = "An unexpected error occurred while saving your data.";
   
-  if (error?.message) {
+  if (error?.code === '23505') {
+    message = "This time slot is already booked or the record already exists.";
+  } else if (error?.message) {
     message = error.message;
   }
 

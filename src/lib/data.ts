@@ -19,13 +19,13 @@ export const HOSPITAL = {
   phones: ["+91 9971107329", "+91 9555114730", "+91 9350160023"],
   emergencyPhone: "+91 9971107329",
   address: {
-    line1: "H.No 78, Behind Women College",
+    line1: "Plot Number 44 A&B, Behind Women College",
     line2: "Tirkha Colony, Sector 2, Ballabhgarh",
     city: "Faridabad",
     state: "Haryana",
     pincode: "121004",
     landmark: "Near Govt. Girls College, Ballabhgarh",
-    full: "H.No 78, Behind Women College, Tirkha Colony, Sector 2, Ballabhgarh, Faridabad, Haryana - 121004",
+    full: "Plot Number 44 A&B, Behind Women College, Tirkha Colony, Sector 2, Ballabhgarh, Faridabad, Haryana - 121004",
   },
   coordinates: {
     lat: 28.3418,

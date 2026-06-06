@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getDoctors } from "@/app/actions/data";
+import { Avatar } from "@/components/ui/Avatar";
 
 export const metadata = {
   title: "Our Specialists | Urocare Apolo Hospital",
@@ -24,9 +25,12 @@ export default async function DoctorsPage() {
             <div key={doctor.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition">
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xl font-bold">
-                    {doctor.name.split(' ').slice(-1)[0][0]}
-                  </div>
+                  <Avatar 
+                    src={doctor.avatar_url} 
+                    alt={doctor.name} 
+                    initials={doctor.name.split(' ').slice(-1)[0][0]} 
+                    className="w-16 h-16 text-xl" 
+                  />
                   <div>
                     <h3 className="text-xl font-bold text-slate-900">{doctor.name}</h3>
                     <p className="text-blue-700 font-medium text-sm">{doctor.department}</p>

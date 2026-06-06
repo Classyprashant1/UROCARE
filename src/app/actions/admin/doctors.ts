@@ -23,7 +23,7 @@ export async function addDoctor(
 
     // 2. Parse and Validate Form Data
     const rawData = {
-      department_id: formData.get('department_id'),
+      department_ids: formData.getAll('department_ids'),
       first_name: formData.get('first_name'),
       last_name: formData.get('last_name'),
       phone: formData.get('phone') || undefined,
@@ -46,6 +46,11 @@ export async function addDoctor(
       email: validatedData.email,
       password: validatedData.password,
       email_confirm: true, // Auto-confirm email
+      user_metadata: {
+        role: 'doctor',
+        first_name: validatedData.first_name,
+        last_name: validatedData.last_name,
+      }
     });
 
     if (authError || !authData.user) {
@@ -57,8 +62,8 @@ export async function addDoctor(
 
     // 4. Upload Photo (if provided)
     if (photoFile && photoFile.size > 0) {
-      const fileExt = photoFile.name.split('.').pop();
-      const fileName = `${newDoctorId}.${fileExt}`;
+      // Always save with just the ID to ensure deterministic URLs!
+      const fileName = `${newDoctorId}`;
       const { data: uploadData, error: uploadError } = await adminAuth.storage
         .from('avatars')
         .upload(fileName, photoFile, { upsert: true });
@@ -67,8 +72,8 @@ export async function addDoctor(
         console.error("Photo upload failed:", uploadError);
         // We continue anyway, but ideally handle this.
       } else if (uploadData) {
-        const { data: publicUrlData } = adminAuth.storage.from('avatars').getPublicUrl(fileName);
-        photoUrl = publicUrlData.publicUrl;
+        // Successfully uploaded deterministic avatar.
+        // We don't save to DB since there's no avatar_url column.
       }
     }
 
@@ -77,7 +82,6 @@ export async function addDoctor(
 
     const { error: insertError } = await adminAuth.from('doctors').insert({
       id: newDoctorId,
-      department_id: validatedData.department_id,
       first_name: validatedData.first_name,
       last_name: validatedData.last_name,
       phone: validatedData.phone,
@@ -97,14 +101,28 @@ export async function addDoctor(
       return handleSupabaseError(insertError);
     }
 
-    revalidatePath('/dashboard/admin/doctors');
+    // 6. Insert into doctor_departments
+    const departmentInserts = validatedData.department_ids.map((depId: string) => ({
+      doctor_id: newDoctorId,
+      department_id: depId
+    }));
+    
+    const { error: deptError } = await adminAuth.from('doctor_departments').insert(departmentInserts);
+    if (deptError) {
+      console.error("Failed to insert doctor departments:", deptError);
+      // We don't rollback the whole doctor here, but we could.
+    }
+
+    revalidatePath('/admin/doctors');
     revalidatePath('/doctors');
     return { success: true };
     
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error("Doctor Validation Error:", error.flatten().fieldErrors);
       return handleZodError(error)
     }
+    console.error("Unexpected server error:", error);
     return { success: false, error: "An unexpected server error occurred." }
   }
 }
@@ -128,7 +146,7 @@ export async function deleteDoctor(id: string): Promise<DbResult<null>> {
       return { success: false, error: error.message };
     }
 
-    revalidatePath('/dashboard/admin/doctors');
+    revalidatePath('/admin/doctors');
     revalidatePath('/doctors');
     return { success: true };
     

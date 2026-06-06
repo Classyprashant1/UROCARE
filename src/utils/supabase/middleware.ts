@@ -35,8 +35,10 @@ export async function updateSession(request: NextRequest) {
   // Protect routes based on user role
   const path = request.nextUrl.pathname
   
-  // Dashboard protection logic
-  if (path.startsWith('/dashboard')) {
+  // Portal protection logic
+  const isPortalRoute = path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/doctor')
+  
+  if (isPortalRoute) {
     if (!user) {
       // Redirect to login if unauthenticated
       const url = request.nextUrl.clone()
@@ -47,11 +49,26 @@ export async function updateSession(request: NextRequest) {
     // Role-based protection
     const role = user.user_metadata?.role || 'patient'
     
-    if (path.startsWith('/dashboard/admin') && role !== 'admin') {
-      return NextResponse.redirect(new URL('/dashboard/patient', request.url))
+    // Admin routes
+    if (path.startsWith('/admin') && role !== 'admin') {
+      const target = role === 'doctor' ? '/doctor' : '/dashboard'
+      return NextResponse.redirect(new URL(target, request.url))
     }
-    if (path.startsWith('/dashboard/doctor') && role !== 'doctor' && role !== 'admin') {
-      return NextResponse.redirect(new URL('/dashboard/patient', request.url))
+    
+    // Doctor routes
+    if (path.startsWith('/doctor') && role !== 'doctor' && role !== 'admin') {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+    
+    // Patient dashboard routes - if an admin or doctor tries to access /dashboard, route them to their respective portal.
+    // (We allow admins to access /doctor above, but let's strictly route their root /dashboard to /admin).
+    if (path === '/dashboard' || path.startsWith('/dashboard/')) {
+      if (role === 'admin') {
+        return NextResponse.redirect(new URL('/admin', request.url))
+      }
+      if (role === 'doctor') {
+        return NextResponse.redirect(new URL('/doctor', request.url))
+      }
     }
   }
 

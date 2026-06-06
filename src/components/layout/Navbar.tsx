@@ -36,9 +36,7 @@ export default function Navbar() {
         <nav className="flex justify-between items-center w-full max-w-7xl mx-auto px-4 md:px-8 h-full">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="material-symbols-outlined text-[28px] text-blue-700 font-variation-fill group-hover:scale-110 transition-transform">
-              local_hospital
-            </span>
+            <img src="/logo.png" alt="Hospital Logo" className="w-10 h-10 object-contain group-hover:scale-110 transition-transform" />
             <span className="text-xl font-bold text-blue-900 tracking-tight">
               {HOSPITAL.shortName}
             </span>
@@ -85,10 +83,12 @@ export default function Navbar() {
             
             <Link 
               href="/login" 
-              className="hidden md:flex items-center justify-center w-10 h-10 rounded-full text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
-              title="Patient Portal Login"
+              className="hidden md:flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wide text-blue-600 bg-white border border-blue-200 shadow-sm hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:border-blue-400 hover:-translate-y-1 active:scale-95 transition-all duration-300 group relative overflow-hidden"
+              title="Login or Signup"
             >
-              <span className="material-symbols-outlined">login</span>
+              <div className="absolute inset-0 bg-blue-50 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+              <span className="material-symbols-outlined text-[18px] relative z-10 group-hover:rotate-12 transition-transform duration-300">login</span>
+              <span className="relative z-10">Login / Signup</span>
             </Link>
 
             {/* Hamburger */}
@@ -116,7 +116,10 @@ export default function Navbar() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center p-5 border-b border-slate-100">
-              <span className="text-lg font-bold text-blue-900">{HOSPITAL.shortName}</span>
+              <div className="flex items-center gap-2">
+                <img src="/logo.png" alt="Hospital Logo" className="w-8 h-8 object-contain" />
+                <span className="text-lg font-bold text-blue-900">{HOSPITAL.shortName}</span>
+              </div>
               <button
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center justify-center w-9 h-9 rounded-full text-slate-500 hover:bg-slate-100 transition-colors"
@@ -145,10 +148,10 @@ export default function Navbar() {
               <div className="my-2 border-t border-slate-100"></div>
               <Link
                 href="/login"
-                className="block px-4 py-3.5 text-base text-slate-700 font-medium hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-3"
+                className="block px-4 py-3.5 text-base text-blue-700 font-bold bg-blue-50/50 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-3 group"
               >
-                <span className="material-symbols-outlined text-slate-400">login</span>
-                Patient Portal
+                <span className="material-symbols-outlined text-blue-500 group-hover:rotate-12 transition-transform">login</span>
+                Login / Signup
               </Link>
             </div>
 

@@ -1,8 +1,10 @@
 import { z } from "zod";
 
 export const BookingSchema = z.object({
-  department_id: z.string().uuid("Invalid department selected."),
-  doctor_id: z.string().uuid("Please select a specific doctor."),
+  patient_name: z.string().min(2, "Patient name is required."),
+  patient_phone: z.string().regex(/^\+?[1-9]\d{9,14}$/, "Please enter a valid phone number."),
+  department_id: z.string().min(1, "Invalid department selected."),
+  doctor_id: z.string().min(1, "Please select a specific doctor."),
   appointment_date: z.string().refine((date) => {
     return new Date(date) >= new Date(new Date().setHours(0,0,0,0));
   }, { message: "Appointment date cannot be in the past." }),
@@ -19,7 +21,7 @@ export const ContactSchema = z.object({
 });
 
 export const DoctorSchema = z.object({
-  department_id: z.string().uuid("Invalid department."),
+  department_ids: z.array(z.string().uuid("Invalid department.")).min(1, "Select at least one department."),
   first_name: z.string().min(2, "First name is required."),
   last_name: z.string().min(2, "Last name is required."),
   phone: z.string().optional(),
@@ -41,6 +43,8 @@ export const PatientProfileSchema = z.object({
   dob: z.string().optional(),
   gender: z.enum(['male', 'female', 'other']).optional(),
   blood_group: z.string().optional(),
+  email: z.string().email("Invalid email address").optional().or(z.literal('')),
+  emergency_contact: z.string().optional(),
   address: z.string().optional(),
 });
 

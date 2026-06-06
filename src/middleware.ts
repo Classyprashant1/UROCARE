@@ -31,8 +31,10 @@ export async function middleware(request: NextRequest) {
 
   // Strict route protection
   const path = request.nextUrl.pathname;
-  
-  if (path.startsWith('/dashboard') || path.startsWith('/booking')) {
+
+  const isProtectedPath = path.startsWith('/dashboard') || path.startsWith('/admin') || path === '/doctor' || path.startsWith('/doctor/') || path.startsWith('/booking');
+
+  if (isProtectedPath) {
     if (!user) {
       // Unauthenticated, kick to login
       const url = request.nextUrl.clone()
@@ -42,20 +44,24 @@ export async function middleware(request: NextRequest) {
   }
 
   // Role-based protection
-  if (path.startsWith('/dashboard')) {
-    const role = user?.user_metadata?.role || 'patient'
-    
-    if (path.startsWith('/dashboard/admin') && role !== 'admin') {
-      const url = request.nextUrl.clone()
-      url.pathname = `/dashboard/${role}`
-      return NextResponse.redirect(url)
-    }
-    
-    if (path.startsWith('/dashboard/doctor') && role !== 'doctor') {
-      const url = request.nextUrl.clone()
-      url.pathname = `/dashboard/${role}`
-      return NextResponse.redirect(url)
-    }
+  const role = user?.user_metadata?.role || 'patient'
+
+  if (path.startsWith('/admin') && role !== 'admin') {
+    const url = request.nextUrl.clone()
+    url.pathname = role === 'patient' ? '/dashboard' : `/${role}`
+    return NextResponse.redirect(url)
+  }
+
+  if ((path === '/doctor' || path.startsWith('/doctor/')) && role !== 'doctor') {
+    const url = request.nextUrl.clone()
+    url.pathname = role === 'patient' ? '/dashboard' : `/${role}`
+    return NextResponse.redirect(url)
+  }
+
+  if (path.startsWith('/dashboard') && role !== 'patient') {
+    const url = request.nextUrl.clone()
+    url.pathname = `/${role}`
+    return NextResponse.redirect(url)
   }
 
   return supabaseResponse
@@ -63,6 +69,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

@@ -11,9 +11,7 @@ export default function Footer() {
         {/* Brand */}
         <div>
           <Link href="/" className="flex items-center gap-2 mb-4 group">
-            <span className="material-symbols-outlined text-2xl text-blue-700 font-variation-fill">
-              local_hospital
-            </span>
+            <img src="/logo.png" alt="Hospital Logo" className="w-8 h-8 object-contain" />
             <h2 className="text-xl font-bold text-blue-900 group-hover:text-blue-700 transition-colors">{HOSPITAL.shortName}</h2>
           </Link>
           <p className="text-slate-600 text-[15px] leading-relaxed mb-6 pr-4">
@@ -60,7 +58,7 @@ export default function Footer() {
           <div className="flex flex-col gap-4">
             <div className="flex items-start gap-2.5">
               <span className="material-symbols-outlined text-[18px] text-teal-600 mt-0.5">location_on</span>
-              <p className="text-sm text-slate-600 leading-relaxed">{HOSPITAL.address.landmark}<br />{HOSPITAL.address.city}, {HOSPITAL.address.state}</p>
+              <p className="text-sm text-slate-600 leading-relaxed">{HOSPITAL.address.line1}<br />{HOSPITAL.address.city}, {HOSPITAL.address.state} - {HOSPITAL.address.pincode}</p>
             </div>
             <div className="flex items-start gap-2.5">
               <span className="material-symbols-outlined text-[18px] text-teal-600 mt-0.5">call</span>

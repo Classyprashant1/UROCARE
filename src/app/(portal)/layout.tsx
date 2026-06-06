@@ -26,39 +26,29 @@ export default async function DashboardLayout({
           <p className="text-sm text-slate-500 mt-1">Welcome back, {name}</p>
         </div>
         <nav className="flex flex-col gap-1 px-4 pb-6">
-          <Link href={`/dashboard/${role}`} className="px-4 py-2.5 rounded-lg bg-blue-50 text-blue-700 font-semibold text-sm flex items-center gap-3">
+          <Link href={role === 'admin' ? '/admin' : role === 'doctor' ? '/doctor' : '/dashboard'} className="px-4 py-2.5 rounded-lg bg-blue-50 text-blue-700 font-semibold text-sm flex items-center gap-3">
             <span className="material-symbols-outlined text-[20px]">dashboard</span>
-            Overview
-          </Link>
-          <Link href={`/dashboard/${role}/appointments`} className="px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm flex items-center gap-3">
-            <span className="material-symbols-outlined text-[20px]">event</span>
-            Appointments
+            Dashboard
           </Link>
           {role === 'admin' && (
             <>
-              <Link href="/dashboard/admin/doctors" className="px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm flex items-center gap-3">
+              <Link href="/admin/doctors" className="px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm flex items-center gap-3">
                 <span className="material-symbols-outlined text-[20px]">stethoscope</span>
                 Manage Doctors
               </Link>
-              <Link href="/dashboard/admin/departments" className="px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm flex items-center gap-3">
+              <Link href="/admin/departments" className="px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm flex items-center gap-3">
                 <span className="material-symbols-outlined text-[20px]">local_hospital</span>
                 Departments
               </Link>
-              <Link href="/dashboard/admin/patients" className="px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm flex items-center gap-3">
+              <Link href="/admin/patients" className="px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm flex items-center gap-3">
                 <span className="material-symbols-outlined text-[20px]">groups</span>
                 Patients
               </Link>
-              <Link href="/dashboard/admin/messages" className="px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm flex items-center gap-3">
+              <Link href="/admin/messages" className="px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm flex items-center gap-3">
                 <span className="material-symbols-outlined text-[20px]">mail</span>
                 Messages
               </Link>
             </>
-          )}
-          {role === 'patient' && (
-            <Link href="/dashboard/patient/records" className="px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 font-medium text-sm flex items-center gap-3">
-              <span className="material-symbols-outlined text-[20px]">medical_information</span>
-              Medical Records
-            </Link>
           )}
           <div className="my-4 border-t border-slate-100"></div>
           <form action="/auth/signout" method="post">
