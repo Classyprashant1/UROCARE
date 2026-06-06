@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getDoctors, getDepartments } from '@/app/actions/data'
 import DoctorManager from './DoctorManager'
 import { createClient } from '@/utils/supabase/server'
@@ -28,3 +29,4 @@ export default async function AdminDoctorsPage() {
     </div>
   )
 }
+

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { createClient } from '@/utils/supabase/server'
 import { getAdminAnalytics } from '@/app/actions/admin/analytics'
 import Link from 'next/link'
@@ -147,3 +148,4 @@ export default async function AdminDashboard() {
     </div>
   )
 }
+

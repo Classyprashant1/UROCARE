@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import Link from "next/link";
 import { HOSPITAL, STATS } from "@/lib/data";
 import { getDepartments, getDoctors, getDoctorsOnLeaveToday } from "@/app/actions/data";
@@ -173,3 +174,4 @@ export default async function HomePage() {
     </>
   );
 }
+

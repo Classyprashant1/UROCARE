@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import Link from "next/link";
 import { getDepartments } from "@/app/actions/data";
 
@@ -66,3 +67,4 @@ export default async function DepartmentsPage() {
     </div>
   );
 }
+

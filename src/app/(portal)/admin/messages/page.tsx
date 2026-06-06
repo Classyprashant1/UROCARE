@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import MessageClient from './MessageClient'
@@ -26,3 +27,4 @@ export default async function AdminMessagesPage() {
     </div>
   )
 }
+

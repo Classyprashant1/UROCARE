@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { DOCTORS, DEPARTMENTS } from '@/lib/data'
@@ -92,3 +93,4 @@ export default async function PatientDashboardPage() {
     </div>
   )
 }
+

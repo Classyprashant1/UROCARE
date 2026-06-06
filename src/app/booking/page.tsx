@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import BookingForm from './BookingForm'
 import { getDepartments, getDoctors } from '@/app/actions/data'
 import { Suspense } from 'react'
@@ -20,3 +21,4 @@ export default async function BookingPage() {
     </div>
   )
 }
+

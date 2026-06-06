@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import LoginForm from './LoginForm'
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ message: string }> }) {
@@ -21,3 +22,4 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     </div>
   )
 }
+

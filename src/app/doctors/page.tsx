@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import Link from "next/link";
 import { getDoctors } from "@/app/actions/data";
 import { Avatar } from "@/components/ui/Avatar";
@@ -71,3 +72,4 @@ export default async function DoctorsPage() {
     </div>
   );
 }
+
