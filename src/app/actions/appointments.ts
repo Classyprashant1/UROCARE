@@ -20,7 +20,7 @@ export async function createAppointment(
     }
 
     // Rate Limiting
-    const rateLimitCheck = rateLimit(\`booking_\${user.id}\`, 3, 60000); // 3 per minute
+    const rateLimitCheck = rateLimit(`booking_${user.id}`, 3, 60000); // 3 per minute
     if (!rateLimitCheck.success) {
       return { success: false, error: rateLimitCheck.error };
     }

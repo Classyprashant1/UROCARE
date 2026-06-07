@@ -19,7 +19,7 @@ export async function submitContactForm(formData: FormData): Promise<DbResult<nu
 
     // Rate Limiting (by IP/email)
     const identifier = typeof rawData.email === 'string' ? rawData.email.toLowerCase() : 'unknown_contact';
-    const rateLimitCheck = rateLimit(\`contact_\${identifier}\`, 3, 3600000); // 3 per hour
+    const rateLimitCheck = rateLimit(`contact_${identifier}`, 3, 3600000); // 3 per hour
     if (!rateLimitCheck.success) {
       return { success: false, error: rateLimitCheck.error };
     }
