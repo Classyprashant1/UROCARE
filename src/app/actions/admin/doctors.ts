@@ -4,12 +4,12 @@ import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { DoctorSchema } from '@/lib/schema'
 import { handleZodError, handleSupabaseError, DbResult } from '@/utils/db'
+import { logger } from '@/utils/logger'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 export async function addDoctor(
-  formData: FormData,
-  photoFile?: File
+  formData: FormData
 ): Promise<DbResult<null>> {
   try {
     const supabase = await createClient();
@@ -58,24 +58,7 @@ export async function addDoctor(
     }
 
     const newDoctorId = authData.user.id;
-    let photoUrl = null;
 
-    // 4. Upload Photo (if provided)
-    if (photoFile && photoFile.size > 0) {
-      // Always save with just the ID to ensure deterministic URLs!
-      const fileName = `${newDoctorId}`;
-      const { data: uploadData, error: uploadError } = await adminAuth.storage
-        .from('avatars')
-        .upload(fileName, photoFile, { upsert: true });
-
-      if (uploadError) {
-        console.error("Photo upload failed:", uploadError);
-        // We continue anyway, but ideally handle this.
-      } else if (uploadData) {
-        // Successfully uploaded deterministic avatar.
-        // We don't save to DB since there's no avatar_url column.
-      }
-    }
 
     // 5. Insert into public.doctors
     const languagesArray = validatedData.languages.split(',').map(s => s.trim());
@@ -115,6 +98,7 @@ export async function addDoctor(
 
     revalidatePath('/admin/doctors');
     revalidatePath('/doctors');
+    logger.info('Doctor added successfully', { adminId: user.id, newDoctorId });
     return { success: true };
     
   } catch (error) {
@@ -148,6 +132,7 @@ export async function deleteDoctor(id: string): Promise<DbResult<null>> {
 
     revalidatePath('/admin/doctors');
     revalidatePath('/doctors');
+    logger.info('Doctor deleted successfully', { adminId: user.id, deletedDoctorId: id });
     return { success: true };
     
   } catch (error) {

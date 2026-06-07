@@ -63,5 +63,20 @@ export const ContactFormSchema = z.object({
   message: z.string().min(10, "Message must be at least 10 characters long."),
 });
 
+export const LoginSchema = z.object({
+  email: z.string().email("Please enter a valid email address."),
+  password: z.string().min(1, "Password is required."),
+});
 
+export const SignupSchema = z.object({
+  email: z.string().email("Please enter a valid email address."),
+  password: z.string().min(6, "Password must be at least 6 characters."),
+});
 
+export const ResetPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address."),
+});
+
+export const UpdatePasswordSchema = z.object({
+  password: z.string().min(6, "Password must be at least 6 characters."),
+});

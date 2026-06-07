@@ -127,7 +127,7 @@ export async function removeDoctorLeave(leaveId: string): Promise<DbResult<null>
   }
 }
 
-export async function updateDoctorProfile(formData: FormData, photoFile?: File): Promise<DbResult<null>> {
+export async function updateDoctorProfile(formData: FormData): Promise<DbResult<null>> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser()
@@ -136,21 +136,6 @@ export async function updateDoctorProfile(formData: FormData, photoFile?: File):
     const { data: doctorCheck } = await supabase.from('doctors').select('id').eq('id', user.id).single();
     if (!doctorCheck) return { success: false, error: "Only doctors can update this." }
 
-    // Upload Photo if provided
-    if (photoFile && photoFile.size > 0) {
-      // Use admin client to bypass RLS for avatars which currently requires admin role
-      const { createAdminClient } = await import('@/utils/supabase/admin');
-      const adminAuth = createAdminClient();
-      const fileName = `${user.id}`;
-      const { error: uploadError } = await adminAuth.storage
-        .from('avatars')
-        .upload(fileName, photoFile, { upsert: true });
-
-      if (uploadError) {
-        console.error("Photo upload failed:", uploadError);
-        return { success: false, error: "Failed to upload profile photo." };
-      }
-    }
 
     // Update DB
     const updateData = {
