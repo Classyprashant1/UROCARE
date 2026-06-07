@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self' data:; connect-src 'self' https: wss:;",
+            value: "default-src 'self' https: http:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https: http:; style-src 'self' 'unsafe-inline' https: http:; img-src 'self' blob: data: https: http:; font-src 'self' data: https: http:; connect-src 'self' https: http: wss:;",
           },
           {
             key: "Permissions-Policy",
