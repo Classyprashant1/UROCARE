@@ -10,7 +10,7 @@ export function validateImageFile(file: File, maxSizeMB: number = 5): { success:
 
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
   if (file.size > maxSizeBytes) {
-    return { success: false, error: \`File is too large. Maximum size is \${maxSizeMB}MB.\` };
+    return { success: false, error: `File is too large. Maximum size is ${maxSizeMB}MB.` };
   }
 
   return { success: true };
