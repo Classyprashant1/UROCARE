@@ -63,20 +63,31 @@ export const ContactFormSchema = z.object({
   message: z.string().min(10, "Message must be at least 10 characters long."),
 });
 
-export const LoginSchema = z.object({
-  email: z.string().email("Please enter a valid email address."),
-  password: z.string().min(1, "Password is required."),
+// New Schemas for Security Hardening
+export const UpdateAppointmentSchema = z.object({
+  status: z.enum(['pending', 'confirmed', 'completed', 'cancelled']),
+  notes: z.string().optional(),
 });
 
-export const SignupSchema = z.object({
-  email: z.string().email("Please enter a valid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters."),
+export const DoctorAvailabilitySchema = z.object({
+  available_days: z.array(z.string()).min(1, "Select at least one available day."),
 });
 
-export const ResetPasswordSchema = z.object({
-  email: z.string().email("Please enter a valid email address."),
+export const DoctorLeaveSchema = z.object({
+  leave_date: z.string().refine((date) => {
+    return new Date(date) >= new Date(new Date().setHours(0,0,0,0));
+  }, { message: "Leave date cannot be in the past." }),
+  reason: z.string().optional(),
 });
 
-export const UpdatePasswordSchema = z.object({
-  password: z.string().min(6, "Password must be at least 6 characters."),
+export const DoctorProfileUpdateSchema = z.object({
+  first_name: z.string().min(2, "First name is required."),
+  last_name: z.string().min(2, "Last name is required."),
+  phone: z.string().optional(),
+  designation: z.string().min(2, "Designation is required."),
+  qualifications: z.string().min(2, "Qualifications are required."),
+  experience: z.string().min(1, "Experience is required."),
+  consultation_fee: z.coerce.number().min(0, "Fee must be a valid number."),
+  languages: z.string().min(2, "Languages are required."),
+  bio: z.string().optional(),
 });

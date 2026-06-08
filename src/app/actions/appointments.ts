@@ -5,7 +5,6 @@ import { BookingSchema } from '@/lib/schema'
 import { handleZodError, handleSupabaseError, DbResult } from '@/utils/db'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { rateLimit } from '@/utils/rate-limit'
 
 export async function createAppointment(
   formData: FormData
@@ -17,12 +16,6 @@ export async function createAppointment(
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return { success: false, error: "You must be logged in to book an appointment." }
-    }
-
-    // Rate Limiting
-    const rateLimitCheck = rateLimit(`booking_${user.id}`, 3, 60000); // 3 per minute
-    if (!rateLimitCheck.success) {
-      return { success: false, error: rateLimitCheck.error };
     }
 
     // Prepare payload

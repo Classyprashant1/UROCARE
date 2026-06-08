@@ -5,7 +5,6 @@ import { ContactFormSchema } from '@/lib/schema'
 import { handleZodError, handleSupabaseError, DbResult } from '@/utils/db'
 import { logger } from '@/utils/logger'
 import { z } from 'zod'
-import { rateLimit } from '@/utils/rate-limit'
 
 export async function submitContactForm(formData: FormData): Promise<DbResult<null>> {
   try {
@@ -15,13 +14,6 @@ export async function submitContactForm(formData: FormData): Promise<DbResult<nu
       phone: formData.get('phone') || undefined,
       subject: formData.get('subject'),
       message: formData.get('message'),
-    }
-
-    // Rate Limiting (by IP/email)
-    const identifier = typeof rawData.email === 'string' ? rawData.email.toLowerCase() : 'unknown_contact';
-    const rateLimitCheck = rateLimit(`contact_${identifier}`, 3, 3600000); // 3 per hour
-    if (!rateLimitCheck.success) {
-      return { success: false, error: rateLimitCheck.error };
     }
 
     // 1. Strict Form Validation

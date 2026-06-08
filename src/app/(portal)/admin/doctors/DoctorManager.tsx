@@ -85,7 +85,7 @@ export default function DoctorManager({ initialDoctors, departments }: { initial
               setIsSubmitting(true);
               setErrorMsg('');
               setFieldErrors({});
-              const res = await addDoctor(formData);
+              const res = await addDoctor(formData, formData.get('photo') as File);
               setIsSubmitting(false);
               if (res.success) {
                 setIsModalOpen(false);

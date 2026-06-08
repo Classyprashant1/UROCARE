@@ -47,7 +47,20 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Role-based protection
-    const role = user.user_metadata?.role || 'patient'
+    // DO NOT TRUST user.user_metadata.role for security decisions.
+    // Query the secure, RLS-protected database tables to establish identity.
+    let role = 'patient';
+    if (user) {
+      const { data: adminData } = await supabase.from('admins').select('id').eq('id', user.id).single();
+      if (adminData) {
+        role = 'admin';
+      } else {
+        const { data: doctorData } = await supabase.from('doctors').select('id').eq('id', user.id).single();
+        if (doctorData) {
+          role = 'doctor';
+        }
+      }
+    }
     
     // Admin routes
     if (path.startsWith('/admin') && role !== 'admin') {

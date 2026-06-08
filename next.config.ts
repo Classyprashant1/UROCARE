@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Referrer-Policy",
-            value: "origin-when-cross-origin",
+            value: "strict-origin-when-cross-origin",
           },
           {
             key: "Strict-Transport-Security",
@@ -25,14 +25,6 @@ const nextConfig: NextConfig = {
           {
             key: "X-XSS-Protection",
             value: "1; mode=block",
-          },
-          {
-            key: "Content-Security-Policy",
-            value: "default-src 'self' https: http:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https: http:; style-src 'self' 'unsafe-inline' https: http:; img-src 'self' blob: data: https: http:; font-src 'self' data: https: http:; connect-src 'self' https: http: wss:;",
-          },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
           },
         ],
       },

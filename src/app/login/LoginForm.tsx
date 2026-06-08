@@ -25,6 +25,9 @@ export default function LoginForm({ initialMessage }: { initialMessage?: string 
         const { error: signUpError, data } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          }
         })
         if (signUpError) throw signUpError
         
@@ -127,7 +130,7 @@ export default function LoginForm({ initialMessage }: { initialMessage?: string 
               setIsLoading(true)
               try {
                 const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                  redirectTo: `${window.location.origin}/update-password`,
+                  redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
                 })
                 if (error) throw error
                 setError('Password reset email sent! Check your inbox.')

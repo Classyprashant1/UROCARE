@@ -74,7 +74,8 @@ export default function DoctorDashboardClient({
     setMsg({ type: '', text: '' })
 
     const formData = new FormData(e.currentTarget)
-    const res = await updateDoctorProfile(formData)
+    const photoFile = formData.get('photo') as File
+    const res = await updateDoctorProfile(formData, photoFile)
     
     setIsSubmitting(false)
     if (res.success) {
