@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { DEPARTMENTS as FallbackDepts, DOCTORS as FallbackDoctors } from '@/lib/data'
 
 export async function getDepartments() {
@@ -25,7 +26,7 @@ export async function getDepartments() {
 
 export async function getDoctors() {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data, error } = await supabase
     .from('doctors')
     .select(`
@@ -85,7 +86,7 @@ export async function getDoctors() {
 }
 
 export async function getDoctorsOnLeaveToday() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   // Get today's date in YYYY-MM-DD format based on local timezone
   // For simplicity, we'll use UTC date as Supabase DATE column compares exactly.
@@ -99,8 +100,10 @@ export async function getDoctorsOnLeaveToday() {
       doctors (
         first_name,
         last_name,
-        departments (
-          name
+        doctor_departments (
+          departments (
+            name
+          )
         )
       )
     `)
@@ -112,10 +115,24 @@ export async function getDoctorsOnLeaveToday() {
   }
 
   // Flatten the nested data structure
-  return data.map((leave: any) => ({
-    id: leave.id,
-    doctor_id: leave.doctor_id,
-    name: `Dr. ${leave.doctors?.first_name} ${leave.doctors?.last_name}`,
-    department: leave.doctors?.departments?.name || 'General'
-  }));
+  return data.map((leave: any) => {
+    const depts = leave.doctors?.doctor_departments?.map((dd: any) => dd.departments?.name).filter(Boolean) || [];
+    return {
+      id: leave.id,
+      doctor_id: leave.doctor_id,
+      name: `Dr. ${leave.doctors?.first_name} ${leave.doctors?.last_name}`,
+      department: depts.length > 0 ? depts.join(', ') : 'General'
+    };
+  });
+}
+
+export async function getDoctorDepartments(doctorId: string) {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('doctor_departments')
+    .select('department_id')
+    .eq('doctor_id', doctorId)
+  
+  if (error || !data) return []
+  return data.map((d: any) => d.department_id)
 }

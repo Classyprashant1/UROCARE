@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import DoctorDashboardClient from './DoctorDashboardClient'
+import { getDoctorDepartments } from '@/app/actions/data'
 
 export default async function DoctorDashboardPage() {
   const supabase = await createClient()
@@ -20,6 +21,10 @@ export default async function DoctorDashboardPage() {
     redirect('/dashboard') // Redirect non-doctors
   }
 
+  // Fetch department_ids array explicitly from doctor_departments
+  const department_ids = await getDoctorDepartments(user.id);
+  doctor.department_ids = department_ids;
+
   // Fetch Appointments for this doctor, joining patient details
   const { data: appointments, error: apptError } = await supabase
     .from('appointments')
@@ -31,7 +36,17 @@ export default async function DoctorDashboardPage() {
     .order('appointment_date', { ascending: false })
 
   if (apptError) {
-    console.error("Doctor Portal Appointments Error:", apptError);
+    console.error(
+      "Doctor Portal Appointments Error:",
+      JSON.stringify(apptError, null, 2)
+    )
+    console.error("Error Message:", apptError?.message)
+    console.error("Error Details:", apptError?.details)
+    console.error("Error Hint:", apptError?.hint)
+    console.error("Error Code:", apptError?.code)
+    
+    // TEMPORARY DEBUG: Return the error directly to the browser
+    return <div id="debug-error"><pre>{JSON.stringify(apptError, null, 2)}</pre></div>
   }
 
   const { data: leaves } = await supabase
@@ -39,6 +54,19 @@ export default async function DoctorDashboardPage() {
     .select('*')
     .eq('doctor_id', user.id)
     .order('leave_date', { ascending: true })
+
+  const { data: departments } = await supabase
+    .from('departments')
+    .select('id, name')
+    .order('name')
+
+  const enrichedAppointments = appointments?.map(appt => {
+    const dept = departments?.find(d => d.id === appt.department_id);
+    return {
+      ...appt,
+      departments: dept ? { name: dept.name } : null
+    }
+  }) || [];
 
   return (
     <div className="p-8 max-w-7xl mx-auto relative z-0">
@@ -60,8 +88,9 @@ export default async function DoctorDashboardPage() {
       
       <DoctorDashboardClient 
         doctor={doctor || {}} 
-        appointments={appointments || []} 
+        appointments={enrichedAppointments} 
         leaves={leaves || []}
+        departments={departments || []}
       />
     </div>
   )

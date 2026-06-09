@@ -8,7 +8,7 @@ export function Avatar({ src, alt, initials, className }: { src: string, alt: st
   return (
     <div className={`flex items-center justify-center overflow-hidden shrink-0 bg-blue-100 text-blue-700 rounded-full font-bold ${className || ''}`}>
       {src && !error ? (
-        /* eslint-disable-next-line @next/next/no-img-element */
+         
         <img 
           src={src} 
           alt={alt} 

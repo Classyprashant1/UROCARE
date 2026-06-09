@@ -1,16 +1,19 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { updateAppointment, updateDoctorAvailability, addDoctorLeave, removeDoctorLeave, updateDoctorProfile } from '@/app/actions/doctor'
 
 export default function DoctorDashboardClient({ 
   doctor, 
   appointments,
-  leaves = []
+  leaves = [],
+  departments = []
 }: { 
   doctor: any, 
   appointments: any[],
-  leaves?: any[]
+  leaves?: any[],
+  departments?: any[]
 }) {
   const [activeTab, setActiveTab] = useState('appointments')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -21,6 +24,13 @@ export default function DoctorDashboardClient({
   
   // Notes Modal state
   const [notesModalData, setNotesModalData] = useState<{id: string, notes: string} | null>(null)
+
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>(doctor.department_ids || [])
+  const router = useRouter()
+
+  useEffect(() => {
+    setSelectedDepartments(doctor.department_ids || [])
+  }, [doctor.department_ids])
 
   const handleAvailabilityUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -74,12 +84,12 @@ export default function DoctorDashboardClient({
     setMsg({ type: '', text: '' })
 
     const formData = new FormData(e.currentTarget)
-    const photoFile = formData.get('photo') as File
-    const res = await updateDoctorProfile(formData, photoFile)
+    const res = await updateDoctorProfile(formData)
     
     setIsSubmitting(false)
     if (res.success) {
       setMsg({ type: 'success', text: 'Profile updated successfully.' })
+      router.refresh()
     } else {
       setMsg({ type: 'error', text: res.error || 'Failed to update profile.' })
     }
@@ -223,14 +233,15 @@ export default function DoctorDashboardClient({
                         </div>
                         
                         {/* Patient Info Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-5 p-4 bg-slate-50/50 rounded-xl border border-slate-100 text-sm">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-slate-50/50 rounded-xl border border-slate-100 text-sm">
                           <div><span className="text-slate-400 text-xs font-bold block uppercase tracking-wider mb-1">Age</span><span className="font-semibold text-slate-700">{getAge(appt.patients?.dob) !== 'N/A' ? `${getAge(appt.patients?.dob)} Years` : 'Not Provided'}</span></div>
                           <div><span className="text-slate-400 text-xs font-bold block uppercase tracking-wider mb-1">Gender</span><span className="font-semibold text-slate-700">{appt.patients?.gender ? appt.patients.gender.charAt(0).toUpperCase() + appt.patients.gender.slice(1) : 'Not Provided'}</span></div>
                           <div><span className="text-slate-400 text-xs font-bold block uppercase tracking-wider mb-1">Blood Group</span><span className="font-semibold text-slate-700">{appt.patients?.blood_group || 'Not Provided'}</span></div>
                           <div><span className="text-slate-400 text-xs font-bold block uppercase tracking-wider mb-1">Phone</span><span className="font-semibold text-slate-700">{appt.patient_phone || appt.patients?.phone || 'Not Provided'}</span></div>
                           <div><span className="text-slate-400 text-xs font-bold block uppercase tracking-wider mb-1">Email</span><span className="font-semibold text-slate-700">{appt.patients?.email || 'Not Provided'}</span></div>
-                          <div><span className="text-slate-400 text-xs font-bold block uppercase tracking-wider mb-1">Appointment</span><span className="font-semibold text-slate-700">{new Date(appt.appointment_date).toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' })}, {appt.appointment_time.substring(0, 5)}</span></div>
-                          <div className="col-span-2 md:col-span-3"><span className="text-slate-400 text-xs font-bold block uppercase tracking-wider mb-1">Reason for Visit</span><span className="font-semibold text-slate-700">{appt.reason || 'Not Provided'}</span></div>
+                          <div><span className="text-slate-400 text-xs font-bold block uppercase tracking-wider mb-1">Department</span><span className="font-semibold text-slate-700">{appt.departments?.name || 'Not Provided'}</span></div>
+                          <div className="col-span-2"><span className="text-slate-400 text-xs font-bold block uppercase tracking-wider mb-1">Appointment</span><span className="font-semibold text-slate-700">{new Date(appt.appointment_date).toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' })}, {appt.appointment_slot || ''} {appt.appointment_time ? appt.appointment_time.substring(0, 5) : ''}</span></div>
+                          <div className="col-span-2 md:col-span-4"><span className="text-slate-400 text-xs font-bold block uppercase tracking-wider mb-1">Reason for Visit</span><span className="font-semibold text-slate-700">{appt.reason || 'Not Provided'}</span></div>
                         </div>
 
                         {appt.notes && (
@@ -316,6 +327,41 @@ export default function DoctorDashboardClient({
                     </label>
                   ))}
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4 p-6 bg-slate-50/50 rounded-2xl border border-slate-100">
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-bold text-slate-800 border-b border-slate-200 pb-2">Morning Shift</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-600 uppercase">Start Time</label>
+                      <input type="time" name="morning_start_time" defaultValue={doctor.morning_start_time || ''} className="h-11 px-3 border border-slate-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-600 uppercase">End Time</label>
+                      <input type="time" name="morning_end_time" defaultValue={doctor.morning_end_time || ''} className="h-11 px-3 border border-slate-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-bold text-slate-800 border-b border-slate-200 pb-2">Evening Shift</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-600 uppercase">Start Time</label>
+                      <input type="time" name="evening_start_time" defaultValue={doctor.evening_start_time || ''} className="h-11 px-3 border border-slate-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-600 uppercase">End Time</label>
+                      <input type="time" name="evening_end_time" defaultValue={doctor.evening_end_time || ''} className="h-11 px-3 border border-slate-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 md:w-1/3">
+                <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Slot Duration (Minutes)</label>
+                <input type="number" name="slot_duration" defaultValue={doctor.slot_duration || 5} min="5" className="h-12 px-4 border border-slate-200 rounded-xl text-sm bg-white text-slate-700 focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 outline-none transition-all shadow-sm font-medium" />
               </div>
 
               <div className="mt-4 flex justify-end">
@@ -426,14 +472,14 @@ export default function DoctorDashboardClient({
                 </div>
               )}
 
-              <form onSubmit={handleProfileUpdate} className="flex flex-col gap-6">
+              <form encType="multipart/form-data" onSubmit={handleProfileUpdate} className="flex flex-col gap-6">
                 
                 {/* Photo Upload Section */}
                 <div className="flex items-center gap-6 mb-4">
                   <div className="relative group">
                     <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg bg-slate-100 flex items-center justify-center">
                       {photoPreview ? (
-                        // eslint-disable-next-line @next/next/no-img-element
+                         
                         <img src={photoPreview} alt="Profile" className="w-full h-full object-cover" />
                       ) : (
                         <span className="material-symbols-outlined text-[40px] text-slate-300">person</span>
@@ -447,6 +493,31 @@ export default function DoctorDashboardClient({
                   <div>
                     <h3 className="text-lg font-bold text-slate-800">Profile Photo</h3>
                     <p className="text-sm text-slate-500">Upload a professional photo. Max 2MB.</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 mb-2">
+                  <label className="text-sm font-semibold text-slate-700">Departments</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {departments?.map(dept => (
+                      <label key={dept.id} className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 hover:border-blue-500 cursor-pointer bg-white/50 transition-colors">
+                        <input 
+                          type="checkbox" 
+                          name="department_ids" 
+                          value={dept.id} 
+                          checked={selectedDepartments.includes(dept.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedDepartments([...selectedDepartments, dept.id])
+                            } else {
+                              setSelectedDepartments(selectedDepartments.filter(id => id !== dept.id))
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-600 focus:ring-2"
+                        />
+                        <span className="text-sm font-medium text-slate-700 select-none">{dept.name}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
 

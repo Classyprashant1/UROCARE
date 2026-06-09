@@ -8,7 +8,8 @@ export const BookingSchema = z.object({
   appointment_date: z.string().refine((date) => {
     return new Date(date) >= new Date(new Date().setHours(0,0,0,0));
   }, { message: "Appointment date cannot be in the past." }),
-  appointment_time: z.enum(["Morning", "Evening"], { message: "Please select Morning or Evening." }),
+  appointment_slot: z.string().min(1, "Please select a slot (Morning/Evening)."),
+  appointment_time: z.string().min(1, "Please select a specific appointment time."),
   reason: z.string().min(5, "Please provide a brief reason for your visit (min 5 characters).").max(1000),
 });
 
@@ -21,7 +22,7 @@ export const ContactSchema = z.object({
 });
 
 export const DoctorSchema = z.object({
-  department_ids: z.array(z.string().uuid("Invalid department.")).min(1, "Select at least one department."),
+  department_ids: z.array(z.string()).min(1, "Select at least one department."),
   first_name: z.string().min(2, "First name is required."),
   last_name: z.string().min(2, "Last name is required."),
   phone: z.string().optional(),
@@ -71,6 +72,11 @@ export const UpdateAppointmentSchema = z.object({
 
 export const DoctorAvailabilitySchema = z.object({
   available_days: z.array(z.string()).min(1, "Select at least one available day."),
+  morning_start_time: z.string().optional(),
+  morning_end_time: z.string().optional(),
+  evening_start_time: z.string().optional(),
+  evening_end_time: z.string().optional(),
+  slot_duration: z.coerce.number().min(5, "Minimum slot duration is 5 mins.").default(5),
 });
 
 export const DoctorLeaveSchema = z.object({
@@ -81,6 +87,7 @@ export const DoctorLeaveSchema = z.object({
 });
 
 export const DoctorProfileUpdateSchema = z.object({
+  department_ids: z.array(z.string()).min(1, "Select at least one department."),
   first_name: z.string().min(2, "First name is required."),
   last_name: z.string().min(2, "Last name is required."),
   phone: z.string().optional(),

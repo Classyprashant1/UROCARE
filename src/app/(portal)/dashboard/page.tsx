@@ -27,18 +27,21 @@ export default async function PatientDashboardPage() {
   if (apptError) console.error("Error fetching appointments:", apptError);
 
   // Fetch doctors and departments to map manually since appointments.doctor_id is TEXT
-  const { data: dbDoctors } = await supabase.from('doctors').select('*, departments(name)');
+  const { data: dbDoctors } = await supabase.from('doctors').select('*, doctor_departments(departments(id, name))');
 
   const enrichedAppointments = appointments?.map(appt => {
     // Try to find the real DB doctor first
     const dbDoctor = dbDoctors?.find(d => d.id === appt.doctor_id);
     if (dbDoctor) {
+      const deptMapping = dbDoctor.doctor_departments?.find((dd: any) => dd.departments?.id === appt.department_id);
+      const deptName = deptMapping?.departments?.name || '';
+
       return {
         ...appt,
         doctors: {
           first_name: dbDoctor.first_name,
           last_name: dbDoctor.last_name,
-          departments: { name: dbDoctor.departments?.name || '' }
+          departments: { name: deptName }
         }
       }
     }

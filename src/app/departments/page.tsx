@@ -54,12 +54,20 @@ export default async function DepartmentsPage() {
                 </div>
               )}
 
-              <Link 
-                href={`/booking?department=${dept.id}`}
-                className="w-full bg-slate-50 text-blue-700 font-semibold py-3 rounded-xl hover:bg-blue-50 transition text-center mt-auto"
-              >
-                Book Consultation
-              </Link>
+              <div className="flex flex-col gap-2 w-full mt-auto">
+                <Link 
+                  href={`/departments/${dept.slug}`}
+                  className="w-full bg-blue-50 text-blue-700 font-semibold py-3 rounded-xl hover:bg-blue-600 hover:text-white transition-colors text-center flex items-center justify-center gap-2"
+                >
+                  Learn More <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </Link>
+                <Link 
+                  href={`/booking?department=${dept.id}`}
+                  className="w-full bg-slate-50 text-slate-700 font-semibold py-3 rounded-xl hover:bg-slate-100 transition text-center"
+                >
+                  Book Consultation
+                </Link>
+              </div>
             </div>
           ))}
         </div>

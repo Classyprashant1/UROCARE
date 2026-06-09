@@ -8,18 +8,20 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 export async function addDoctor(
-  formData: FormData,
-  photoFile?: File
+  formData: FormData
 ): Promise<DbResult<null>> {
   try {
     const supabase = await createClient();
     
-    // 1. Check if caller is Admin
+    // Check if caller is Admin
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { success: false, error: "Unauthorized." }
     
     const { data: adminCheck } = await supabase.from('admins').select('id').eq('id', user.id).single();
     if (!adminCheck) return { success: false, error: "Admin access required." }
+
+    // Safely pull photoFile directly out of FormData boundary
+    const photoFile = formData.get('photo') as File | null;
 
     // 2. Parse and Validate Form Data
     const rawData = {
@@ -58,7 +60,7 @@ export async function addDoctor(
     }
 
     const newDoctorId = authData.user.id;
-    let photoUrl = null;
+    const photoUrl = null;
 
     // 4. Upload Photo (if provided)
     if (photoFile && photoFile.size > 0) {

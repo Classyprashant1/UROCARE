@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { createAppointment } from '@/app/actions/appointments'
+import { createAppointment, getAvailableTimeSlots, SlotInfo } from '@/app/actions/appointments'
 
 export default function BookingForm({ departments, doctors }: { departments: any[], doctors: any[] }) {
   const searchParams = useSearchParams()
@@ -10,7 +10,11 @@ export default function BookingForm({ departments, doctors }: { departments: any
   const [deptId, setDeptId] = useState('')
   const [doctorId, setDoctorId] = useState('')
   const [date, setDate] = useState('')
-  const [time, setTime] = useState('')
+  
+  const [availableSlots, setAvailableSlots] = useState<SlotInfo[]>([])
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false)
+  const [selectedSlotObj, setSelectedSlotObj] = useState<SlotInfo | null>(null)
+
   const [reason, setReason] = useState('')
   const [patientName, setPatientName] = useState('')
   const [patientPhone, setPatientPhone] = useState('')
@@ -33,8 +37,37 @@ export default function BookingForm({ departments, doctors }: { departments: any
     }
   }, [searchParams])
 
-  const filteredDoctors = doctorId ? doctors.filter(d => d.id === doctorId) : 
-                          deptId ? doctors.filter(d => d.department === departments.find(dep=>dep.id === deptId)?.name) : doctors
+  useEffect(() => {
+    const fetchSlots = async () => {
+      if (doctorId && date) {
+        setIsLoadingSlots(true);
+        setSelectedSlotObj(null);
+        try {
+          const slots = await getAvailableTimeSlots(doctorId, date);
+          setAvailableSlots(slots);
+        } catch (err) {
+          setAvailableSlots([]);
+        } finally {
+          setIsLoadingSlots(false);
+        }
+      } else {
+        setAvailableSlots([]);
+      }
+    };
+    fetchSlots();
+  }, [doctorId, date]);
+
+  const filteredDoctors = doctors.filter(d => {
+    if (doctorId && d.id !== doctorId) return false;
+    if (deptId) {
+      console.log('Selected Department:', deptId);
+      console.log('Doctor:', d.name);
+      console.log('Department IDs:', d.departmentIds);
+      
+      return Array.isArray(d.departmentIds) && d.departmentIds.includes(deptId);
+    }
+    return true;
+  });
 
   const selectedDoctorInfo = doctors.find(d => d.id === doctorId);
 
@@ -48,7 +81,7 @@ export default function BookingForm({ departments, doctors }: { departments: any
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!isValidDate(date)) return;
+    if (!isValidDate(date) || !selectedSlotObj) return;
 
     setIsSubmitting(true)
     setErrorMsg('')
@@ -60,7 +93,8 @@ export default function BookingForm({ departments, doctors }: { departments: any
     formData.append('department_id', deptId)
     if (doctorId) formData.append('doctor_id', doctorId)
     formData.append('appointment_date', date)
-    formData.append('appointment_time', time)
+    formData.append('appointment_slot', selectedSlotObj.slot)
+    formData.append('appointment_time', selectedSlotObj.time)
     formData.append('reason', reason)
 
     const res = await createAppointment(formData)
@@ -108,8 +142,9 @@ export default function BookingForm({ departments, doctors }: { departments: any
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-slate-700">Full Name</label>
+              <label htmlFor="patientName" className="text-sm font-semibold text-slate-700">Full Name</label>
               <input 
+                id="patientName"
                 type="text"
                 className={`h-12 px-4 border rounded-lg text-slate-800 focus:ring-2 outline-none ${fieldErrors.patient_name ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-600'}`}
                 value={patientName}
@@ -120,8 +155,9 @@ export default function BookingForm({ departments, doctors }: { departments: any
               {fieldErrors.patient_name && <p className="text-xs text-red-500">{fieldErrors.patient_name[0]}</p>}
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-slate-700">Phone Number</label>
+              <label htmlFor="patientPhone" className="text-sm font-semibold text-slate-700">Phone Number</label>
               <input 
+                id="patientPhone"
                 type="tel"
                 className={`h-12 px-4 border rounded-lg text-slate-800 focus:ring-2 outline-none ${fieldErrors.patient_phone ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-600'}`}
                 value={patientPhone}
@@ -138,9 +174,10 @@ export default function BookingForm({ departments, doctors }: { departments: any
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-slate-700">Department</label>
+              <label htmlFor="department" className="text-sm font-semibold text-slate-700">Department</label>
               <select 
-                className={`h-12 px-4 border rounded-lg text-slate-800 focus:ring-2 outline-none ${fieldErrors.department_id ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-600'}`}
+                id="department"
+                className={`appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.2em_1.2em] bg-[right_0.8rem_center] bg-no-repeat pr-10 h-12 px-4 border rounded-lg text-slate-800 focus:ring-2 outline-none ${fieldErrors.department_id ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-600'}`}
                 value={deptId}
                 onChange={(e) => { setDeptId(e.target.value); setDoctorId(''); }}
                 required
@@ -151,9 +188,10 @@ export default function BookingForm({ departments, doctors }: { departments: any
               {fieldErrors.department_id && <p className="text-xs text-red-500">{fieldErrors.department_id[0]}</p>}
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-slate-700">Doctor</label>
+              <label htmlFor="doctor" className="text-sm font-semibold text-slate-700">Doctor</label>
               <select 
-                className={`h-12 px-4 border rounded-lg text-slate-800 focus:ring-2 outline-none ${fieldErrors.doctor_id ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-600'}`}
+                id="doctor"
+                className={`appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.2em_1.2em] bg-[right_0.8rem_center] bg-no-repeat pr-10 h-12 px-4 border rounded-lg text-slate-800 focus:ring-2 outline-none ${fieldErrors.doctor_id ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-600'}`}
                 value={doctorId}
                 onChange={(e) => setDoctorId(e.target.value)}
                 required
@@ -197,18 +235,41 @@ export default function BookingForm({ departments, doctors }: { departments: any
               {fieldErrors.appointment_date && !dateError && <p className="text-xs text-red-500">{fieldErrors.appointment_date[0]}</p>}
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-slate-700">Preferred Time</label>
-              <select 
-                className={`h-12 px-4 border rounded-lg text-slate-800 focus:ring-2 outline-none ${fieldErrors.appointment_time ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-600'}`}
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                required
-                disabled={!date || !doctorId || !!dateError}
-              >
-                <option value="">Select Time...</option>
-                <option value="Morning">Morning</option>
-                <option value="Evening">Evening</option>
-              </select>
+              <label htmlFor="timeSlot" className="text-sm font-semibold text-slate-700">Available Time Slots</label>
+              <div className="relative">
+                <select 
+                  id="timeSlot"
+                  className={`appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.2em_1.2em] bg-[right_0.8rem_center] bg-no-repeat pr-10 h-12 w-full px-4 border rounded-lg text-slate-800 focus:ring-2 outline-none ${fieldErrors.appointment_time ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-600'}`}
+                  value={selectedSlotObj ? `${selectedSlotObj.slot}|${selectedSlotObj.time}` : ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (!val) {
+                      setSelectedSlotObj(null);
+                      return;
+                    }
+                    const [slot, time] = val.split('|');
+                    setSelectedSlotObj({ slot, time });
+                  }}
+                  required
+                  disabled={!date || !doctorId || !!dateError || isLoadingSlots || availableSlots.length === 0}
+                >
+                  <option value="">
+                    {!date ? 'Select a date first' : 
+                     isLoadingSlots ? 'Loading slots...' : 
+                     availableSlots.length === 0 ? 'No slots available' : 'Select Time...'}
+                  </option>
+                  {availableSlots.map(s => (
+                    <option key={`${s.slot}|${s.time}`} value={`${s.slot}|${s.time}`}>
+                      {s.time} ({s.slot})
+                    </option>
+                  ))}
+                </select>
+                {isLoadingSlots && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <span className="material-symbols-outlined animate-spin text-slate-400">sync</span>
+                  </div>
+                )}
+              </div>
               {fieldErrors.appointment_time && <p className="text-xs text-red-500">{fieldErrors.appointment_time[0]}</p>}
             </div>
           </div>
@@ -227,7 +288,7 @@ export default function BookingForm({ departments, doctors }: { departments: any
             <button type="button" onClick={() => setStep(1)} className="px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition-colors">
               Back
             </button>
-            <button type="submit" disabled={!date || !time || !reason || isSubmitting || !!dateError} className="px-6 py-3 bg-blue-700 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-800 transition-colors flex items-center gap-2">
+            <button type="submit" disabled={!date || !selectedSlotObj || !reason || isSubmitting || !!dateError} className="px-6 py-3 bg-blue-700 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-800 transition-colors flex items-center gap-2">
               {isSubmitting ? 'Booking...' : 'Confirm Booking'}
             </button>
           </div>

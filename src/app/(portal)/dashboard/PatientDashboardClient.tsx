@@ -205,30 +205,30 @@ export default function PatientDashboardClient({
             <form onSubmit={handleProfileUpdate} className="flex flex-col gap-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">First Name</label>
-                  <input name="first_name" defaultValue={profile.first_name} required className="h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" />
+                  <label htmlFor="first_name" className="text-sm font-semibold text-slate-700">First Name</label>
+                  <input id="first_name" name="first_name" defaultValue={profile.first_name} required className="h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Last Name</label>
-                  <input name="last_name" defaultValue={profile.last_name} required className="h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Phone</label>
-                  <input name="phone" defaultValue={profile.phone} className="h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Date of Birth</label>
-                  <input type="date" name="dob" defaultValue={profile.dob} className="h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" />
+                  <label htmlFor="last_name" className="text-sm font-semibold text-slate-700">Last Name</label>
+                  <input id="last_name" name="last_name" defaultValue={profile.last_name} required className="h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Gender</label>
-                  <select name="gender" defaultValue={profile.gender} className="h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-white">
+                  <label htmlFor="phone" className="text-sm font-semibold text-slate-700">Phone</label>
+                  <input id="phone" name="phone" defaultValue={profile.phone} className="h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="dob" className="text-sm font-semibold text-slate-700">Date of Birth</label>
+                  <input id="dob" type="date" name="dob" defaultValue={profile.dob} className="h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="gender" className="text-sm font-semibold text-slate-700">Gender</label>
+                  <select id="gender" name="gender" defaultValue={profile.gender} className="appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.2em_1.2em] bg-[right_0.8rem_center] bg-no-repeat pr-10 h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-white">
                     <option value="">Select...</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
@@ -236,8 +236,8 @@ export default function PatientDashboardClient({
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Blood Group</label>
-                  <select name="blood_group" defaultValue={profile.blood_group} className="h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-white">
+                  <label htmlFor="blood_group" className="text-sm font-semibold text-slate-700">Blood Group</label>
+                  <select id="blood_group" name="blood_group" defaultValue={profile.blood_group} className="appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.2em_1.2em] bg-[right_0.8rem_center] bg-no-repeat pr-10 h-11 px-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none bg-white">
                     <option value="">Select...</option>
                     <option value="A+">A+</option><option value="A-">A-</option>
                     <option value="B+">B+</option><option value="B-">B-</option>
@@ -250,8 +250,8 @@ export default function PatientDashboardClient({
 
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-700">Residential Address</label>
-                <textarea name="address" defaultValue={profile.address} className="p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none min-h-[100px]" />
+                <label htmlFor="address" className="text-sm font-semibold text-slate-700">Residential Address</label>
+                <textarea id="address" name="address" defaultValue={profile.address} className="p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none min-h-[100px]" />
               </div>
 
               <div className="mt-4 flex justify-end">

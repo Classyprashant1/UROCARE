@@ -9,12 +9,12 @@ export default function DoctorManager({ initialDoctors, departments }: { initial
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
-  
+
   // Basic list view
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)}
           className="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-800 transition flex items-center gap-2"
         >
@@ -37,20 +37,20 @@ export default function DoctorManager({ initialDoctors, departments }: { initial
             {initialDoctors.map(doctor => (
               <tr key={doctor.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4 font-medium text-slate-900 flex items-center gap-3">
-                  <Avatar 
-                    src={doctor.avatar_url} 
-                    alt={doctor.name} 
-                    initials={doctor.name.split(' ').slice(-1)[0][0]} 
-                    className="w-10 h-10 text-sm" 
+                  <Avatar
+                    src={doctor.avatar_url}
+                    alt={doctor.name}
+                    initials={doctor.name.split(' ').slice(-1)[0][0]}
+                    className="w-10 h-10 text-sm"
                   />
                   {doctor.name}
                 </td>
                 <td className="px-6 py-4">{doctor.department}</td>
                 <td className="px-6 py-4">{doctor.designation}</td>
                 <td className="px-6 py-4 text-right flex justify-end gap-3">
-                  <button 
+                  <button
                     onClick={async () => {
-                      if(confirm('Are you sure you want to delete this doctor?')) {
+                      if (confirm('Are you sure you want to delete this doctor?')) {
                         await deleteDoctor(doctor.id);
                       }
                     }}
@@ -80,12 +80,12 @@ export default function DoctorManager({ initialDoctors, departments }: { initial
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
-            
+
             <form action={async (formData) => {
               setIsSubmitting(true);
               setErrorMsg('');
               setFieldErrors({});
-              const res = await addDoctor(formData, formData.get('photo') as File);
+              const res = await addDoctor(formData);
               setIsSubmitting(false);
               if (res.success) {
                 setIsModalOpen(false);
@@ -94,7 +94,7 @@ export default function DoctorManager({ initialDoctors, departments }: { initial
                 if (res.fieldErrors) setFieldErrors(res.fieldErrors);
               }
             }} className="p-6 flex flex-col gap-5">
-              
+
               {errorMsg && (
                 <div className="p-3 bg-red-50 text-red-700 rounded border border-red-200 text-sm">
                   {errorMsg}
